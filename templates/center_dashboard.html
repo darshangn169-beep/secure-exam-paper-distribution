@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3">Exam Center Dashboard</h4>
+<p class="text-muted">Current server time: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+<table class="table table-bordered bg-white">
+    <thead class="table-light">
+        <tr>
+            <th>Title</th><th>Subject</th><th>Exam Time</th><th>Status</th><th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p, unlocked, exam_time in paper_status %}
+        <tr>
+            <td>{{ p.title }}</td>
+            <td>{{ p.subject }}</td>
+            <td>{{ p.exam_datetime }}</td>
+            <td>
+                {% if unlocked %}
+                    <span class="badge bg-success">Unlocked</span>
+                {% else %}
+                    <span class="badge bg-secondary">🔒 Locked</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if unlocked %}
+                <a href="{{ url_for('center_decrypt', paper_id=p.id) }}" class="btn btn-sm btn-primary">
+                    Decrypt &amp; Download
+                </a>
+                {% else %}
+                <button class="btn btn-sm btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="5" class="text-center text-muted">No papers assigned yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="alert alert-info mt-3">
+    <strong>How decryption works:</strong> Your RSA private key unwraps the AES key,
+    AES decrypts the paper, then the admin's digital signature is verified against
+    a fresh SHA-256 hash. If the file was altered even by one byte, verification fails
+    and the download is blocked.
+</div>
+{% endblock %}

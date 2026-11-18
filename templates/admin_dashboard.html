@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Admin Dashboard — Question Paper Setter</h4>
+    <a href="{{ url_for('admin_logs') }}" class="btn btn-outline-secondary btn-sm">View Access Logs</a>
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">Upload &amp; Encrypt New Paper</h5>
+        <form method="POST" action="{{ url_for('admin_upload') }}" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Paper Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. CNS End Sem" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" placeholder="e.g. Cryptography & Network Security" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Send to Exam Center</label>
+                    <select name="center" class="form-select" required>
+                        {% for c in centers %}
+                        <option value="{{ c.username }}">{{ c.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Exam Date &amp; Time (unlock time)</label>
+                    <input type="datetime-local" name="exam_datetime" class="form-control" required>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Question Paper (PDF)</label>
+                    <input type="file" name="paper" accept="application/pdf" class="form-control" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-3">🔒 Encrypt &amp; Dispatch</button>
+        </form>
+    </div>
+</div>
+
+<h5>Dispatched Papers</h5>
+<table class="table table-bordered table-sm bg-white">
+    <thead class="table-light">
+        <tr>
+            <th>Title</th><th>Subject</th><th>Center</th><th>Exam Time</th>
+            <th>SHA-256 (short)</th><th>Uploaded At</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in papers %}
+        <tr>
+            <td>{{ p.title }}</td>
+            <td>{{ p.subject }}</td>
+            <td>{{ p.center_username }}</td>
+            <td>{{ p.exam_datetime }}</td>
+            <td><code>{{ p.sha256_hash[:16] }}...</code></td>
+            <td>{{ p.uploaded_at }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6" class="text-center text-muted">No papers uploaded yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
